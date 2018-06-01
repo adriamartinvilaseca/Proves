@@ -15,7 +15,7 @@ refcat = {}
 
 # Lectura arxiu general AEG
 with open("GrafAEG.csv") as csvfile1:
-    perireader = csv.reader(csvfile1, delimiter=",")
+    perireader = csv.reader(csvfile1, delimiter=";")
     next(perireader)
     for row2 in perireader:
         id = row2[0]
@@ -109,18 +109,18 @@ with open("GrafSAED_2.csv") as csvfile3:
             else:
                 refcat[id][altura][5] = llarg
 
-# errors = [0]
-# errorsRef = []
-# for id in refcat.keys():
-#     for altura in refcat[id]:
-#         peri = refcat[id][altura][2] + refcat[id][altura][3] + refcat[id][altura][4] + refcat[id][altura][5]
-#         if refcat[id][altura][1] != "-" and peri != 0:
-#             peri2 = float(refcat[id][altura][1])
-#             if abs(peri - peri2) > 10:
-#                 errors[0] += 1
-#                 referror = id + " " + altura + " " + str(peri) + " " + str(peri2)
-#                 errorsRef.append(referror)
-#                 print(referror)
+errors = [0]
+errorsRef = []
+for id in refcat.keys():
+    for altura in refcat[id]:
+        peri = refcat[id][altura][2] + refcat[id][altura][3] + refcat[id][altura][4] + refcat[id][altura][5]
+        if refcat[id][altura][1] != "-" and peri != 0:
+            peri2 = float(refcat[id][altura][1])
+            if abs(peri - peri2) > 10:
+                errors[0] += 1
+                referror = id + " " + altura + " " + str(peri) + " " + str(peri2)
+                errorsRef.append(referror)
+                print(referror)
 
 # Revisió resultats
 # for id in refcat:
@@ -133,9 +133,9 @@ with open("GrafSAED_2.csv") as csvfile3:
 # print("Num registres diccionari: ", end=": ")
 # print(len(refcat.keys()))
 
-# print("")
-# print("Num de casos amb més de 10m2 de dif:, end=": ")
-# print(errorsRef)
+print("")
+print("Num de casos amb més de 10m2 de dif", end=": ")
+print(len(errorsRef))
 
 # Pujar a la BBDD
 # conn_string = "host='bbddalphanumeric.czciosgdrat6.eu-west-1.rds.amazonaws.com' dbname='DBalphanumeric' user='paulcharbonneau' password='db_testing_alpha'"
