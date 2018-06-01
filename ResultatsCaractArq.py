@@ -14,12 +14,6 @@ def getRef(cursor, refcat):
     cursor.execute("SELECT * FROM referencies_alpha WHERE REFCAT = '{}';".format(refcat))
     return cursor.fetchall()
 
-def getImmb_us_prn(cursor):
-    cursor.execute("SELECT COUNT(id) AS Immb, SUM(num_v::integer) AS Viv, SUM(sup_sbr::integer) AS M2SBR, "
-                   "SUM(sup_viv_sbr::integer) AS M2VIVSBR FROM referencies_alpha WHERE secc_censal GROUP BY immb_us_prn "
-                   "ORDER BY immb_us_prn")
-    return cursor.fetchall()
-
 
 conn_string = "host='prodtestdb.czciosgdrat6.eu-west-1.rds.amazonaws.com' dbname='dbprodtest' user='testuser' password='CICLICAc1cl1c4'"
 print("Connecting to database\n	->%s" % (conn_string))
@@ -113,6 +107,11 @@ immb_numplantes = {
     "Total": [0, 0, 0, 0]
 }
 
+ordenacio = []
+numviviendes = []
+anyconstruccio = []
+plantaltura = []
+propietat = []
 
 for r in conjuntRA:
     r = list(r)
@@ -252,21 +251,13 @@ for r in conjuntRA:
             immb_tipus_resi["IMMB_NO_V"][1] += r[6]
             immb_tipus_resi["IMMB_NO_V"][2] += r[15]
             immb_tipus_resi["IMMB_NO_V"][3] += r[16]
-        immb_tipus_resi["Total"][0] = immb_tipus_resi["IMMB_EXC_V"][0] + immb_tipus_resi["IMMB_PRN_75_V"][0] + \
-                                      immb_tipus_resi["IMMB_PRN_50_V"][0] + immb_tipus_resi["IMMB_AMB_V"][0] + \
-                                      immb_tipus_resi["IMMB_NO_V"][0]
-        immb_tipus_resi["Total"][1] = immb_tipus_resi["IMMB_EXC_V"][1] + immb_tipus_resi["IMMB_PRN_75_V"][1] + \
-                                      immb_tipus_resi["IMMB_PRN_50_V"][1] + immb_tipus_resi["IMMB_AMB_V"][1] + \
-                                      immb_tipus_resi["IMMB_NO_V"][1]
-        immb_tipus_resi["Total"][2] = immb_tipus_resi["IMMB_EXC_V"][2] + immb_tipus_resi["IMMB_PRN_75_V"][2] + \
-                                      immb_tipus_resi["IMMB_PRN_50_V"][2] + immb_tipus_resi["IMMB_AMB_V"][2] + \
-                                      immb_tipus_resi["IMMB_NO_V"][2]
-        immb_tipus_resi["Total"][3] = immb_tipus_resi["IMMB_EXC_V"][3] + immb_tipus_resi["IMMB_PRN_75_V"][3] + \
-                                      immb_tipus_resi["IMMB_PRN_50_V"][3] + immb_tipus_resi["IMMB_AMB_V"][3] + \
-                                      immb_tipus_resi["IMMB_NO_V"][3]
+        immb_tipus_resi["Total"][0] += 1
+        immb_tipus_resi["Total"][1] += r[6]
+        immb_tipus_resi["Total"][2] += r[15]
+        immb_tipus_resi["Total"][3] += r[16]
 
 #################################################### Immb_tipus_prop ###################################################
-    if r[1] in aeg and r[6] is not None and r[6] != 0:
+    if r[1] in aeg and r[6] is not None and r[6] != 0 and r[12] != "":
         if r[5] == "U" or r[5] == "P_CORR":
             immb_tipus_prop["DivisioHor"][0] += 1
             immb_tipus_prop["DivisioHor"][1] += r[6]
@@ -277,13 +268,16 @@ for r in conjuntRA:
             immb_tipus_prop["NoDivisioHor"][1] += r[6]
             immb_tipus_prop["NoDivisioHor"][2] += r[15]
             immb_tipus_prop["NoDivisioHor"][3] += r[16]
-        immb_tipus_prop["Total"][0] = immb_tipus_prop["DivisioHor"][0] + immb_tipus_prop["NoDivisioHor"][0]
-        immb_tipus_prop["Total"][1] = immb_tipus_prop["DivisioHor"][1] + immb_tipus_prop["NoDivisioHor"][1]
-        immb_tipus_prop["Total"][2] = immb_tipus_prop["DivisioHor"][2] + immb_tipus_prop["NoDivisioHor"][2]
-        immb_tipus_prop["Total"][3] = immb_tipus_prop["DivisioHor"][3] + immb_tipus_prop["NoDivisioHor"][3]
+        else:
+            if r[5] not in propietat:
+                propietat.append(r[5])
+        immb_tipus_prop["Total"][0] += 1
+        immb_tipus_prop["Total"][1] += r[6]
+        immb_tipus_prop["Total"][2] += r[15]
+        immb_tipus_prop["Total"][3] += r[16]
 
 #################################################### Immb_num_v ########################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0:
+    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "":
         if r[7] == "U":
             immb_num_v["U"][0] += 1
             immb_num_v["U"][1] += r[6]
@@ -314,17 +308,16 @@ for r in conjuntRA:
             immb_num_v["P_40mes"][1] += r[6]
             immb_num_v["P_40mes"][2] += r[15]
             immb_num_v["P_40mes"][3] += r[16]
-        immb_num_v["Total"][0] = immb_num_v["U"][0] + immb_num_v["P_2a4"][0] + immb_num_v["P_5a9"][0] + \
-                                 immb_num_v["P_10a19"][0] + immb_num_v["P_20a39"][0] + immb_num_v["P_40mes"][0]
-        immb_num_v["Total"][1] = immb_num_v["U"][1] + immb_num_v["P_2a4"][1] + immb_num_v["P_5a9"][1] + \
-                                 immb_num_v["P_10a19"][1] + immb_num_v["P_20a39"][1] + immb_num_v["P_40mes"][1]
-        immb_num_v["Total"][2] = immb_num_v["U"][2] + immb_num_v["P_2a4"][2] + immb_num_v["P_5a9"][2] + \
-                                 immb_num_v["P_10a19"][2] + immb_num_v["P_20a39"][2] + immb_num_v["P_40mes"][2]
-        immb_num_v["Total"][3] = immb_num_v["U"][3] + immb_num_v["P_2a4"][3] + immb_num_v["P_5a9"][3] + \
-                                 immb_num_v["P_10a19"][3] + immb_num_v["P_20a39"][3] + immb_num_v["P_40mes"][3]
+        else:
+            if r[5] not in numviviendes:
+                numviviendes.append(r[5])
+        immb_num_v["Total"][0] += 1
+        immb_num_v["Total"][1] += r[6]
+        immb_num_v["Total"][2] += r[15]
+        immb_num_v["Total"][3] += r[16]
 
 #################################################### Immb_ord ##########################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0:
+    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "":
         if r[8] == "EAI":
             immb_ord["EAI"][0] += 1
             immb_ord["EAI"][1] += r[6]
@@ -345,22 +338,21 @@ for r in conjuntRA:
             immb_ord["EFI"][1] += r[6]
             immb_ord["EFI"][2] += r[15]
             immb_ord["EFI"][3] += r[16]
-        elif r[8] == "IND" or r[8] == "NO_V" or r[8] == "":
+        elif r[8] == "IND" or r[8] == "NO_V":
             immb_ord["IND"][0] += 1
             immb_ord["IND"][1] += r[6]
             immb_ord["IND"][2] += r[15]
             immb_ord["IND"][3] += r[16]
-        immb_ord["Total"][0] = immb_ord["EAI"][0] + immb_ord["EAV"][0] + immb_ord["EVE"][0] + immb_ord["EFI"][0] + \
-                               immb_ord["IND"][0]
-        immb_ord["Total"][1] = immb_ord["EAI"][1] + immb_ord["EAV"][1] + immb_ord["EVE"][1] + immb_ord["EFI"][1] + \
-                               immb_ord["IND"][1]
-        immb_ord["Total"][2] = immb_ord["EAI"][2] + immb_ord["EAV"][2] + immb_ord["EVE"][2] + immb_ord["EFI"][2] + \
-                               immb_ord["IND"][2]
-        immb_ord["Total"][3] = immb_ord["EAI"][3] + immb_ord["EAV"][3] + immb_ord["EVE"][3] + immb_ord["EFI"][3] + \
-                               immb_ord["IND"][3]
+        else:
+            if r[5] not in ordenacio:
+                ordenacio.append(r[5])
+        immb_ord["Total"][0] += 1
+        immb_ord["Total"][1] += r[6]
+        immb_ord["Total"][2] += r[15]
+        immb_ord["Total"][3] += r[16]
 
 #################################################### Immb_anycons ######################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0:
+    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "":
         if r[10] == "FS35":
             immb_anycons["FS35"][0] += 1
             immb_anycons["FS35"][1] += r[6]
@@ -386,17 +378,16 @@ for r in conjuntRA:
             immb_anycons["08EN"][1] += r[6]
             immb_anycons["08EN"][2] += r[15]
             immb_anycons["08EN"][3] += r[16]
-        immb_anycons["Total"][0] = immb_anycons["FS35"][0] + immb_anycons["3660"][0] + immb_anycons["6180"][0] + \
-                                   immb_anycons["8107"][0] + immb_anycons["08EN"][0]
-        immb_anycons["Total"][1] = immb_anycons["FS35"][1] + immb_anycons["3660"][1] + immb_anycons["6180"][1] + \
-                                   immb_anycons["8107"][1] + immb_anycons["08EN"][1]
-        immb_anycons["Total"][2] = immb_anycons["FS35"][2] + immb_anycons["3660"][2] + immb_anycons["6180"][2] + \
-                                   immb_anycons["8107"][2] + immb_anycons["08EN"][2]
-        immb_anycons["Total"][3] = immb_anycons["FS35"][3] + immb_anycons["3660"][3] + immb_anycons["6180"][3] + \
-                                   immb_anycons["8107"][3] + immb_anycons["08EN"][3]
+        else:
+            if r[5] not in anyconstruccio:
+                anyconstruccio.append(r[5])
+        immb_anycons["Total"][0] += 1
+        immb_anycons["Total"][1] += r[6]
+        immb_anycons["Total"][2] += r[15]
+        immb_anycons["Total"][3] += r[16]
 
 #################################################### Immb_numplantes ###################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0:
+    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "":
         if r[12] == "De P-1 en avall":
             immb_numplantes["PSTR"][0] += 1
             immb_numplantes["PSTR"][1] += r[6]
@@ -412,19 +403,13 @@ for r in conjuntRA:
             immb_numplantes["PB3omes"][1] += r[6]
             immb_numplantes["PB3omes"][2] += r[15]
             immb_numplantes["PB3omes"][3] += r[16]
-        elif r[12] == "":
-            immb_numplantes["IND"][0] += 1
-            immb_numplantes["IND"][1] += r[6]
-            immb_numplantes["IND"][2] += r[15]
-            immb_numplantes["IND"][3] += r[16]
-        immb_numplantes["Total"][0] = immb_numplantes["PSTR"][0] + immb_numplantes["PBaPB2"][0] + \
-                                      immb_numplantes["PB3omes"][0] + immb_numplantes["IND"][0]
-        immb_numplantes["Total"][1] = immb_numplantes["PSTR"][1] + immb_numplantes["PBaPB2"][1] + \
-                                      immb_numplantes["PB3omes"][1] + immb_numplantes["IND"][1]
-        immb_numplantes["Total"][2] = immb_numplantes["PSTR"][2] + immb_numplantes["PBaPB2"][2] + \
-                                      immb_numplantes["PB3omes"][2] + immb_numplantes["IND"][2]
-        immb_numplantes["Total"][3] = immb_numplantes["PSTR"][3] + immb_numplantes["PBaPB2"][3] + \
-                                      immb_numplantes["PB3omes"][3] + immb_numplantes["IND"][3]
+        else:
+            if r[5] not in plantaltura:
+                plantaltura.append(r[5])
+        immb_numplantes["Total"][0] += 1
+        immb_numplantes["Total"][1] += r[6]
+        immb_numplantes["Total"][2] += r[15]
+        immb_numplantes["Total"][3] += r[16]
 
 ################################################ PRINT #################################################################
 print("Total referències: ", end=": ")
@@ -485,3 +470,11 @@ print(immb_numplantesDF)
 # num_v_dictDF = num_v_dictDF.T
 
 # num_v_dictDF.to_csv("RefNumv.csv")
+
+print(immb_us_prn)
+
+print(ordenacio)
+print(numviviendes)
+print(anyconstruccio)
+print(plantaltura)
+print(propietat)
