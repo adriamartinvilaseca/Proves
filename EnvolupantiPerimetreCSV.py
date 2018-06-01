@@ -120,6 +120,7 @@ with open("GrafSAED_2.csv") as csvfile3:
 #                 errors[0] += 1
 #                 referror = id + " " + altura + " " + str(peri) + " " + str(peri2)
 #                 errorsRef.append(referror)
+#                 print(referror)
 
 # Revisió resultats
 # for id in refcat:
@@ -132,7 +133,8 @@ with open("GrafSAED_2.csv") as csvfile3:
 # print("Num registres diccionari: ", end=": ")
 # print(len(refcat.keys()))
 
-# print(errors)
+# print("")
+# print("Num de casos amb més de 10m2 de dif:, end=": ")
 # print(errorsRef)
 
 # Pujar a la BBDD
@@ -141,15 +143,15 @@ with open("GrafSAED_2.csv") as csvfile3:
 # conn = psycopg2.connect(conn_string)
 # cursor = conn.cursor()
 
-conjuntInfoBBDD = []
-for id in refcat.keys():
-    for altura in refcat[id]:
-        infoBBDD = [altura, id, refcat[id][altura][1], refcat[id][altura][0], refcat[id][altura][2],
-                  refcat[id][altura][3], refcat[id][altura][4], refcat[id][altura][5]]
-        conjuntInfoBBDD.append(infoBBDD)
-        print(infoBBDD)
-        # insertgraf(cursor, llista)
-print(conjuntInfoBBDD)
+# conjuntInfoBBDD = []
+# for id in refcat.keys():
+#     for altura in refcat[id]:
+#         infoBBDD = [altura, id, refcat[id][altura][1], refcat[id][altura][0], refcat[id][altura][2],
+#                   refcat[id][altura][3], refcat[id][altura][4], refcat[id][altura][5]]
+#         conjuntInfoBBDD.append(infoBBDD)
+#         print(infoBBDD)
+#         # insertgraf(cursor, llista)
+# print(conjuntInfoBBDD)
 
 
 
