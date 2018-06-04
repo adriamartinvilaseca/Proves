@@ -29,55 +29,15 @@ with open("GrafAEG.csv") as csvfile1:
             else:
                 refcat[id][altura] = [row2[3], row2[2], 0, 0, 0, 0]
 
-# Lectura axiu envolupants SAED_1
-with open("GrafSAED_1.csv") as csvfile2:
-    grafreader = csv.reader(csvfile2, delimiter=";")
+# Lectura axiu envolupants SAED
+with open("GrafSAED.csv") as csvfile2:
+    grafreader = csv.reader(csvfile2, delimiter=",")
     next(grafreader)
     for row in grafreader:
         id = row[0]
         altura = str(row[1])
         tipus = row[2]
         llarg = ((float(row[5]) - float(row[7])) ** 2 + (float(row[6]) - float(row[8])) ** 2) ** 0.5
-        if id in refcat:
-            if altura in refcat[id]:
-                if tipus == "F":
-                    refcat[id][altura][2] += llarg
-                elif tipus == "PI":
-                    refcat[id][altura][3] += llarg
-                elif tipus == "ME":
-                    refcat[id][altura][4] += llarg
-                else:
-                    refcat[id][altura][5] += llarg
-            else:
-                refcat[id][altura] = ["-", "-", 0, 0, 0, 0,]
-                if tipus == "F":
-                    refcat[id][altura][2] = llarg
-                elif tipus == "PI":
-                    refcat[id][altura][3] = llarg
-                elif tipus == "ME":
-                    refcat[id][altura][4] = llarg
-                else:
-                    refcat[id][altura][5] = llarg
-        else:
-            refcat[id] = {altura:["-", "-", 0, 0, 0, 0,]}
-            if tipus == "F":
-                refcat[id][altura][2] = llarg
-            elif tipus == "PI":
-                refcat[id][altura][3] = llarg
-            elif tipus == "ME":
-                refcat[id][altura][4] = llarg
-            else:
-                refcat[id][altura][5] = llarg
-
-# Lectura arxiu envolupants SAED_2
-with open("GrafSAED_2.csv") as csvfile3:
-    grafreader2 = csv.reader(csvfile3, delimiter=";")
-    next(grafreader2)
-    for row3 in grafreader2:
-        id = row3[0]
-        altura = str(row3[1])
-        tipus = row3[2]
-        llarg = ((float(row3[5]) - float(row3[7])) ** 2 + (float(row3[6]) - float(row3[8])) ** 2) ** 0.5
         if id in refcat:
             if altura in refcat[id]:
                 if tipus == "F":
@@ -116,25 +76,14 @@ for id in refcat.keys():
         peri = refcat[id][altura][2] + refcat[id][altura][3] + refcat[id][altura][4] + refcat[id][altura][5]
         if refcat[id][altura][1] != "-" and peri != 0:
             peri2 = float(refcat[id][altura][1])
-            if abs(peri - peri2) > 10:
+            if abs(peri - peri2) > 1:
                 errors[0] += 1
                 referror = id + " " + altura + " " + str(peri) + " " + str(peri2)
                 errorsRef.append(referror)
                 print(referror)
 
-# Revisió resultats
-# for id in refcat:
-#     print("")
-#     print(id)
-#     for altura in refcat[id]:
-#         print(altura, end=": ")
-#         print(refcat[id][altura])
-# print("")
-# print("Num registres diccionari: ", end=": ")
-# print(len(refcat.keys()))
-
 print("")
-print("Num de casos amb més de 10m2 de dif", end=": ")
+print("Num de casos amb més de 1m2 de dif", end=": ")
 print(len(errorsRef))
 
 # Pujar a la BBDD
@@ -146,7 +95,7 @@ print(len(errorsRef))
 # conjuntInfoBBDD = []
 # for id in refcat.keys():
 #     for altura in refcat[id]:
-#         infoBBDD = [altura, id, refcat[id][altura][1], refcat[id][altura][0], refcat[id][altura][2],
+#         infoBBDD = [int(altura)-1, id, refcat[id][altura][1], refcat[id][altura][0], refcat[id][altura][2],
 #                   refcat[id][altura][3], refcat[id][altura][4], refcat[id][altura][5]]
 #         conjuntInfoBBDD.append(infoBBDD)
 #         print(infoBBDD)
