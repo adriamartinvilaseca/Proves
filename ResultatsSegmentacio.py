@@ -71,10 +71,12 @@ for r in conjuntRA:
         immbtotal += 1
         vivtotal += r[6]
 
-print(segmentacio100)
+for e in segmentacio100:
+    print(e, end=": ")
+    print(segmentacio100[e])
 
 print("Num immb: ", end=": ")
 print(immbtotal)
-print("Num immb: ", end=": ")
+print("Num hab: ", end=": ")
 print(vivtotal)
 
