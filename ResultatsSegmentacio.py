@@ -71,10 +71,14 @@ for r in conjuntRA:
         immbtotal += 1
         vivtotal += r[6]
 
-for e in segmentacio100:
-    print(e, end=": ")
-    print(segmentacio100[e])
+segmentacio100DF = pd.DataFrame(segmentacio100)
+segmentacio100DF.index = nomsVariables
+print("")
+print("Segmentacio 100: ")
+print(segmentacio100DF)
+segmentacio100DF.to_csv("Segmentacio100.csv")
 
+print("")
 print("Num immb: ", end=": ")
 print(immbtotal)
 print("Num hab: ", end=": ")
