@@ -2,11 +2,10 @@ import psycopg2
 import csv
 import pandas as pd
 
-
 def getReferencies(cursor):
     cursor.execute("SELECT REFCAT, SECC_CENSAL, IMMB_US_PRN, IMMB_TIPUS, IMMB_TIPUS_PERCENT, UNI_PLURI_CORR, NUM_V, "
                    "PLURI_NUM_V, ORD, ANYCONST_SUP_V, ANYCONST_ETAPA_SUP_V, AL_V_MAX, AL_IMMB, SEGMENT_100, SEGMENT_10,"
-                   "SUP_SBR, SUP_VIV_SBR FROM referencies_alpha;")
+                   "SUP_SBR, SUP_VIV_SBR, SUP_VIV_IND, SUP_VIV_STR FROM referencies_alpha;")
     return cursor.fetchall()
 
 def getRef(cursor, refcat):
@@ -27,9 +26,13 @@ conn.close()
 
 
 nomsVariables = ["immb", "viv", "m2_SBR", "m2_VIV_SBR"]
+nomsVariablesPlanol = ["Immb_us_prn", "Immb_tipus_resi", "Immb_tipus_prop", "Immb_num_v", "Immb_ord",
+                      "Immb_anycons", "Immb_numplantes", "Cluster"]
 aeg = []
 conjuntRefAEG = 0
 municipis = {}
+error1 = []
+planolRef = {}
 
 with open("SeccCensals_AEG.csv") as csvfile:
     ambitreader = csv.reader(csvfile, delimiter=",")
@@ -45,9 +48,7 @@ with open("SeccCensals_Municipis.csv") as csvfile2:
             if a != "":
                 seccCensalsMuni.append(a)
         municipis[r[0]] = seccCensalsMuni
-print(municipis)
-
-
+count = 0
 #################################################### Definicio diccionaris #############################################
 immb_us_prn = {
     "Residencial": [0, 0, 0, 0],
@@ -62,7 +63,6 @@ immb_us_prn = {
     "IndustrialResta": [0, 0, 0, 0],
     "Aparcament": [0, 0, 0, 0],
     "Altres": [0, 0, 0, 0],
-    "Error": [0, 0, 0, 0],
     "Total": [0, 0, 0, 0]
 }
 immb_tipus_resi = {
@@ -107,7 +107,6 @@ immb_numplantes = {
     "De P-1 en avall": [0, 0, 0, 0],
     "De PB a PB+2": [0, 0, 0, 0],
     "De PB+3 o mes": [0, 0, 0, 0],
-    "IND": [0, 0, 0, 0],
     "Total": [0, 0, 0, 0]
 }
 
@@ -115,7 +114,8 @@ immb_numplantes = {
 for r in conjuntRef:
     r = list(r)
     if r[1] in aeg:
-        conjuntRefAEG +=1
+        conjuntRefAEG += 1
+        planolRef[r[0]] = ["", "", "", "", "", "", "", ""] # Refcat, Immb_us_prn, Immb_tipus_resi, Immb_tipus_prop, Immb_num_v, Immb_ord, Immb_anycons, Immb_numplantes, Cluster
     if r[4] is not None:
         r[4] = float(r[4])
     if r[6] is not None:
@@ -124,97 +124,111 @@ for r in conjuntRef:
         r[15] = float(r[15])
     if r[16] is not None:
         r[16] = float(r[16])
+    if r[17] is not None:
+        r[17] = float(r[17])
+    if r[18] is not None:
+        r[18] = float(r[18])
 
 #################################################### Immb_us_prn #######################################################
-    if r[1] in aeg and r[5] != "P_CORR":
+    if r[1] in aeg and r[5] != "P_CORR" and r[17]*10 < r[15]:
         if r[2] == "AltresCal" or r[2] == "AltresNoCal" or r[2] == "Emmagatzematge":
             immb_us_prn["Altres"][0] += 1
             immb_us_prn["Altres"][1] += r[6]
             immb_us_prn["Altres"][2] += r[15]
             immb_us_prn["Altres"][3] += r[16]
+            planolRef[r[0]][0] = "Altres"
         elif r[2] != "Comu" and r[2] != "VincViv":
             immb_us_prn[r[2]][0] += 1
             immb_us_prn[r[2]][1] += r[6]
             immb_us_prn[r[2]][2] += r[15]
             immb_us_prn[r[2]][3] += r[16]
+            planolRef[r[0]][0] = r[2]
         immb_us_prn["Total"][0] += 1
         immb_us_prn["Total"][1] += 1
         immb_us_prn["Total"][2] += 1
         immb_us_prn["Total"][3] += 1
 
 #################################################### Immb_tipus_resi ###################################################
-    if r[1] in aeg and r[5] != "P_CORR":
+    if r[1] in aeg and r[5] != "P_CORR" and r[17]*10 < r[15]:
         immb_tipus_resi[r[3]][0] += 1
         immb_tipus_resi[r[3]][1] += r[6]
         immb_tipus_resi[r[3]][2] += r[15]
         immb_tipus_resi[r[3]][3] += r[16]
+        planolRef[r[0]][1] = r[3]
         immb_tipus_resi["Total"][0] += 1
         immb_tipus_resi["Total"][1] += r[6]
         immb_tipus_resi["Total"][2] += r[15]
         immb_tipus_resi["Total"][3] += r[16]
 
 #################################################### Immb_tipus_prop ###################################################
-    if r[1] in aeg and r[6] is not None and r[6] != 0 and r[12] != "":
+    if r[1] in aeg and r[6] is not None and r[6] != 0 and r[12] != "" and r[17]*10 < r[15]:
         if r[5] == "U" or r[5] == "P_CORR":
             immb_tipus_prop["NoDivisioHor"][0] += 1
             immb_tipus_prop["NoDivisioHor"][1] += r[6]
             immb_tipus_prop["NoDivisioHor"][2] += r[15]
             immb_tipus_prop["NoDivisioHor"][3] += r[16]
+            planolRef[r[0]][2] = "NoDivisioHor"
         elif r[5] == "P":
             immb_tipus_prop["DivisioHor"][0] += 1
             immb_tipus_prop["DivisioHor"][1] += r[6]
             immb_tipus_prop["DivisioHor"][2] += r[15]
             immb_tipus_prop["DivisioHor"][3] += r[16]
+            planolRef[r[0]][2] = "DivisioHor"
         immb_tipus_prop["Total"][0] += 1
         immb_tipus_prop["Total"][1] += r[6]
         immb_tipus_prop["Total"][2] += r[15]
         immb_tipus_prop["Total"][3] += r[16]
 
 #################################################### Immb_num_v ########################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "":
+    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "" and r[17]*10 < r[15]:
         immb_num_v[r[7]][0] += 1
         immb_num_v[r[7]][1] += r[6]
         immb_num_v[r[7]][2] += r[15]
         immb_num_v[r[7]][3] += r[16]
+        planolRef[r[0]][3] = r[7]
         immb_num_v["Total"][0] += 1
         immb_num_v["Total"][1] += r[6]
         immb_num_v["Total"][2] += r[15]
         immb_num_v["Total"][3] += r[16]
 
 #################################################### Immb_ord ##########################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "":
+    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "" and r[17]*10 < r[15]:
         if r[8] == "IND" or r[8] == "NO_V":
             immb_ord["IND"][0] += 1
             immb_ord["IND"][1] += r[6]
             immb_ord["IND"][2] += r[15]
             immb_ord["IND"][3] += r[16]
+            planolRef[r[0]][4] = "IND"
         else:
             immb_ord[r[8]][0] += 1
             immb_ord[r[8]][1] += r[6]
             immb_ord[r[8]][2] += r[15]
             immb_ord[r[8]][3] += r[16]
+            planolRef[r[0]][4] = r[8]
         immb_ord["Total"][0] += 1
         immb_ord["Total"][1] += r[6]
         immb_ord["Total"][2] += r[15]
         immb_ord["Total"][3] += r[16]
 
 #################################################### Immb_anycons ######################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "":
+    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "" and r[17]*10 < r[15]:
         immb_anycons[r[10]][0] += 1
         immb_anycons[r[10]][1] += r[6]
         immb_anycons[r[10]][2] += r[15]
         immb_anycons[r[10]][3] += r[16]
+        planolRef[r[0]][5] = r[10]
         immb_anycons["Total"][0] += 1
         immb_anycons["Total"][1] += r[6]
         immb_anycons["Total"][2] += r[15]
         immb_anycons["Total"][3] += r[16]
 
 #################################################### Immb_numplantes ###################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "":
+    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "" and r[17]*10 < r[15]:
         immb_numplantes[r[12]][0] += 1
         immb_numplantes[r[12]][1] += r[6]
         immb_numplantes[r[12]][2] += r[15]
         immb_numplantes[r[12]][3] += r[16]
+        planolRef[r[0]][6] = r[12]
         immb_numplantes["Total"][0] += 1
         immb_numplantes["Total"][1] += r[6]
         immb_numplantes["Total"][2] += r[15]
@@ -262,5 +276,7 @@ immb_numplantesDF.index = nomsVariables
 immb_numplantesDF = immb_numplantesDF.T
 print(immb_numplantesDF)
 
-# provaDF = immb_us_prnDF + immb_tipus_resiDF + immb_tipus_propDF
-# provaDF.to_csv("Prova.csv")
+planolRefDF = pd.DataFrame(planolRef)
+planolRefDF.index = nomsVariablesPlanol
+planolRefDF = planolRefDF.T
+planolRefDF.to_csv("CaractArq_Planol.csv")
