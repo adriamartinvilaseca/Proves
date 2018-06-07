@@ -5,7 +5,7 @@ import pandas as pd
 def getReferencies(cursor):
     cursor.execute("SELECT REFCAT, SECC_CENSAL, IMMB_US_PRN, IMMB_TIPUS, IMMB_TIPUS_PERCENT, UNI_PLURI_CORR, NUM_V, "
                    "PLURI_NUM_V, ORD, ANYCONST_SUP_V, ANYCONST_ETAPA_SUP_V, AL_V_MAX, AL_IMMB, SEGMENT_100, SEGMENT_10,"
-                   "SUP_SBR, SUP_VIV_SBR, SUP_VIV_IND, SUP_VIV_STR FROM referencies_alpha;")
+                   "SUP_SBR, SUP_VIV_SBR, SUP_VIV_IND, SUP_VIV_STR, SUP_TOTAL FROM referencies_alpha;")
     return cursor.fetchall()
 
 def getRef(cursor, refcat):
@@ -48,10 +48,24 @@ with open("SeccCensals_Municipis.csv") as csvfile2:
             if a != "":
                 seccCensalsMuni.append(a)
         municipis[r[0]] = seccCensalsMuni
-count = 0
+
+countImmb = 0
+countViv = 0
+countSUP_TOTAL = 0
+countSUP_SBR = 0
+countSUP_VIV_SBR = 0
+countError = 0
 
 #################################################### Analisi variables #################################################
 for r in conjuntRef:
     r = list(r)
     if r[1] in aeg:
-        conjuntRefAEG += 1
+        countImmb += 1
+        countViv += r[6]
+        countSUP_SBR += r[19]
+        countSUP_SBR += r[15]
+        countSUP_VIV_SBR += r[16]
+    if r[1] in aeg and r[17] * 10 >= r[15]:
+        countError += 1
+
+
