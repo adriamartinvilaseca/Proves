@@ -7,7 +7,7 @@ import pandas as pd
 def getReferencies(cursor):
     cursor.execute("SELECT REFCAT, SECC_CENSAL, IMMB_US_PRN, IMMB_TIPUS, IMMB_TIPUS_PERCENT, UNI_PLURI_CORR, NUM_V, "
                    "PLURI_NUM_V, ORD, ANYCONST_SUP_V, ANYCONST_ETAPA_SUP_V, AL_V_MAX, AL_IMMB, SEGMENT_100, SEGMENT_10,"
-                   "SUP_SBR, SUP_VIV_SBR FROM referencies_alpha;")
+                   "SUP_SBR, SUP_VIV_SBR, SUP_VIV_IND, SUP_VIV_STR FROM referencies_alpha;")
     return cursor.fetchall()
 
 def getRef(cursor, refcat):
@@ -62,8 +62,12 @@ for r in conjuntRA:
         r[15] = float(r[15])
     if r[16] is not None:
         r[16] = float(r[16])
+    if r[17] is not None:
+        r[17] = float(r[17])
+    if r[18] is not None:
+        r[18] = float(r[18])
 
-    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and len(r[13]) == 5:
+    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[13] != "" and r[17] * 10 < r[15]:
         segmentacio100[r[13]][0] += 1
         segmentacio100[r[13]][1] += r[6]
         segmentacio100[r[13]][2] += r[15]
