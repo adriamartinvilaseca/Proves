@@ -161,8 +161,8 @@ for r in conjuntRef:
         immb_tipus_resi["Total"][3] += r[16]
 
 #################################################### Immb_tipus_prop ###################################################
-    if r[1] in aeg and r[6] is not None and r[6] != 0 and r[12] != "" and r[17]*10 < r[15]:
-        if r[5] == "U" or r[5] == "P_CORR":
+    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "" and r[17] * 10 < r[15]:
+        if r[5] == "U":
             immb_tipus_prop["NoDivisioHor"][0] += 1
             immb_tipus_prop["NoDivisioHor"][1] += r[6]
             immb_tipus_prop["NoDivisioHor"][2] += r[15]
