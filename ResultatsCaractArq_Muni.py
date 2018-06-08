@@ -134,8 +134,8 @@ for r in conjuntRef:
         resultatsMuni[r[19]]["Total_immb_tipus_resi"] += r[6]
 
 #################################################### Immb_tipus_prop ###################################################
-    if r[1] in aeg and r[6] is not None and r[6] != 0 and r[12] != "" and r[17] * 10 < r[15]:
-        if r[5] == "U" or r[5] == "P_CORR":
+    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "" and r[17] * 10 < r[15]:
+        if r[5] == "U" :
             resultatsMuni[r[19]]["NoDivisioHor"] += r[6]
         elif r[5] == "P":
             resultatsMuni[r[19]]["DivisioHor"] += r[6]
