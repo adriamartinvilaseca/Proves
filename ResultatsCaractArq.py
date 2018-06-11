@@ -104,7 +104,6 @@ immb_anycons = {
     "Total": [0, 0, 0, 0]
 }
 immb_numplantes = {
-    "De P-1 en avall": [0, 0, 0, 0],
     "De PB a PB+2": [0, 0, 0, 0],
     "De PB+3 o mes": [0, 0, 0, 0],
     "Total": [0, 0, 0, 0]
@@ -118,8 +117,6 @@ for r in conjuntRef:
         planolRef[r[0]] = ["", "", "", "", "", "", "", ""] # Refcat, Immb_us_prn, Immb_tipus_resi, Immb_tipus_prop, Immb_num_v, Immb_ord, Immb_anycons, Immb_numplantes, Cluster
     if r[4] is not None:
         r[4] = float(r[4])
-    if r[6] is not None:
-        r[6] = int(r[6])
     if r[15] is not None:
         r[15] = float(r[15])
     if r[16] is not None:
@@ -128,40 +125,47 @@ for r in conjuntRef:
         r[17] = float(r[17])
     if r[18] is not None:
         r[18] = float(r[18])
+    if r[6] is not None and r[16] > 0:
+        r[6] = int(r[6])
+    else:
+        r[6] = 0
 
 #################################################### Immb_us_prn #######################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[17]*10 < r[15]:
-        if r[2] == "AltresCal" or r[2] == "AltresNoCal" or r[2] == "Emmagatzematge":
+    if r[1] in aeg and r[5] != "P_CORR" and r[17]*10 <= r[16] and ((r[3] != "IMMB_NO_V" and r[16] > 0) or
+                                                                   r[3] == "IMMB_NO_V"):
+        if r[2] == "AltresCal" or r[2] == "AltresNoCal" or r[2] == "Emmagatzematge" or r[2] == "Comu" or \
+                r[2] == "VincViv":
             immb_us_prn["Altres"][0] += 1
             immb_us_prn["Altres"][1] += r[6]
             immb_us_prn["Altres"][2] += r[15]
             immb_us_prn["Altres"][3] += r[16]
             planolRef[r[0]][0] = "Altres"
-        elif r[2] != "Comu" and r[2] != "VincViv":
+        else:
             immb_us_prn[r[2]][0] += 1
             immb_us_prn[r[2]][1] += r[6]
             immb_us_prn[r[2]][2] += r[15]
             immb_us_prn[r[2]][3] += r[16]
             planolRef[r[0]][0] = r[2]
         immb_us_prn["Total"][0] += 1
-        immb_us_prn["Total"][1] += 1
-        immb_us_prn["Total"][2] += 1
-        immb_us_prn["Total"][3] += 1
+        immb_us_prn["Total"][1] += r[6]
+        immb_us_prn["Total"][2] += r[15]
+        immb_us_prn["Total"][3] += r[16]
 
 #################################################### Immb_tipus_resi ###################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[17]*10 < r[15]:
-        immb_tipus_resi[r[3]][0] += 1
-        immb_tipus_resi[r[3]][1] += r[6]
-        immb_tipus_resi[r[3]][2] += r[15]
-        immb_tipus_resi[r[3]][3] += r[16]
-        planolRef[r[0]][1] = r[3]
-        immb_tipus_resi["Total"][0] += 1
-        immb_tipus_resi["Total"][1] += r[6]
-        immb_tipus_resi["Total"][2] += r[15]
-        immb_tipus_resi["Total"][3] += r[16]
+    if r[1] in aeg and r[5] != "P_CORR" and r[17]*10 <= r[16]:
+        if (r[3] != "IMMB_NO_V" and r[16] > 0) or r[3] == "IMMB_NO_V":
+            immb_tipus_resi[r[3]][0] += 1
+            immb_tipus_resi[r[3]][1] += r[6]
+            immb_tipus_resi[r[3]][2] += r[15]
+            immb_tipus_resi[r[3]][3] += r[16]
+            planolRef[r[0]][1] = r[3]
+            immb_tipus_resi["Total"][0] += 1
+            immb_tipus_resi["Total"][1] += r[6]
+            immb_tipus_resi["Total"][2] += r[15]
+            immb_tipus_resi["Total"][3] += r[16]
 
 #################################################### Immb_tipus_prop ###################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "" and r[17] * 10 < r[15]:
+    if r[1] in aeg and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
         if r[5] == "U":
             immb_tipus_prop["NoDivisioHor"][0] += 1
             immb_tipus_prop["NoDivisioHor"][1] += r[6]
@@ -180,7 +184,7 @@ for r in conjuntRef:
         immb_tipus_prop["Total"][3] += r[16]
 
 #################################################### Immb_num_v ########################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "" and r[17]*10 < r[15]:
+    if r[1] in aeg and r[5] != "P_CORR" and r[16] > 0 and r[17]*10 <= r[16]:
         immb_num_v[r[7]][0] += 1
         immb_num_v[r[7]][1] += r[6]
         immb_num_v[r[7]][2] += r[15]
@@ -192,7 +196,7 @@ for r in conjuntRef:
         immb_num_v["Total"][3] += r[16]
 
 #################################################### Immb_ord ##########################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "" and r[17]*10 < r[15]:
+    if r[1] in aeg and r[5] != "P_CORR" and r[16] > 0 and r[17]*10 <= r[16]:
         if r[8] == "IND" or r[8] == "NO_V":
             immb_ord["IND"][0] += 1
             immb_ord["IND"][1] += r[6]
@@ -211,7 +215,7 @@ for r in conjuntRef:
         immb_ord["Total"][3] += r[16]
 
 #################################################### Immb_anycons ######################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "" and r[17]*10 < r[15]:
+    if r[1] in aeg and r[5] != "P_CORR" and r[16] > 0 and r[17]*10 <= r[16]:
         immb_anycons[r[10]][0] += 1
         immb_anycons[r[10]][1] += r[6]
         immb_anycons[r[10]][2] += r[15]
@@ -223,7 +227,7 @@ for r in conjuntRef:
         immb_anycons["Total"][3] += r[16]
 
 #################################################### Immb_numplantes ###################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "" and r[17]*10 < r[15]:
+    if r[1] in aeg and r[5] != "P_CORR" and r[16] > 0 and r[17]*10 <= r[16]:
         immb_numplantes[r[12]][0] += 1
         immb_numplantes[r[12]][1] += r[6]
         immb_numplantes[r[12]][2] += r[15]

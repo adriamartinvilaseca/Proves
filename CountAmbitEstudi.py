@@ -69,8 +69,6 @@ for r in conjuntRef:
     r = list(r)
     if r[4] is not None:
         r[4] = float(r[4])
-    if r[6] is not None:
-        r[6] = int(r[6])
     if r[15] is not None:
         r[15] = float(r[15])
     if r[16] is not None:
@@ -81,29 +79,32 @@ for r in conjuntRef:
         r[18] = float(r[18])
     if r[19] is not None:
         r[19] = float(r[19])
-    if r[1] in aeg:
+    if r[6] is not None and r[16] > 0:
+        r[6] = int(r[6])
+    else:
+        r[6] = 0
+    if r[1] in aeg and r[5] != "P_CORR" and r[17]*10 <= r[16] and ((r[3] != "IMMB_NO_V" and r[16] > 0) or
+                                                                   r[3] == "IMMB_NO_V"):
         countImmb_AEG += 1
-        if r[6] > 0:
-            countImmb_VIV_AEG += 1
-        countViv_AEG += r[6]
         countSUP_TOTAL_AEG += r[19]
         countSUP_SBR_AEG += r[15]
-        countSUP_VIV_SBR_AEG += r[16] + r[17] + r[18]
-    if r[1] in aeg and r[17] * 10 >= r[15]:
-        countError_AEG += 1
-    countImmb += 1
-    if r[6] > 0:
-        countImmb_VIV += 1
-    countViv += r[6]
-    countSUP_TOTAL += r[19]
-    countSUP_SBR += r[15]
-    countSUP_VIV_SBR += r[16]
-    if r[17] * 10 >= r[15]:
-        countError += 1
+        if r[16] > 0:
+            countImmb_VIV_AEG += 1
+            countViv_AEG += r[6]
+            countSUP_VIV_SBR_AEG += r[16]
+    if r[5] != "P_CORR" and r[17]*10 <= r[16]and ((r[3] != "IMMB_NO_V" and r[16] > 0) or
+                                                                   r[3] == "IMMB_NO_V"):
+        countImmb += 1
+        if r[16] > 0:
+            countImmb_VIV += 1
+            countViv += r[6]
+            countSUP_VIV_SBR += r[16]
+        countSUP_TOTAL += r[19]
+        countSUP_SBR += r[15]
 print("TOTAL:")
 print("Immb", end=": ")
 print(countImmb)
-print("Immb", end=": ")
+print("Immb_VIV", end=": ")
 print(countImmb_VIV)
 print("Viv", end=": ")
 print(countViv)
@@ -113,13 +114,13 @@ print("SUP_SBR", end=": ")
 print(countSUP_SBR)
 print("SUP_VIV_SBR", end=": ")
 print(countSUP_VIV_SBR)
-print("ErrorsIndeterminat", end=": ")
+print("ErrorsIndeterminat i P_CORR", end=": ")
 print(countError)
 print("")
 print("AEG:")
 print("Immb", end=": ")
 print(countImmb_AEG)
-print("Immb", end=": ")
+print("Immb_VIV", end=": ")
 print(countImmb_VIV_AEG)
 print("Viv", end=": ")
 print(countViv_AEG)
@@ -129,6 +130,6 @@ print("SUP_SBR", end=": ")
 print(countSUP_SBR_AEG)
 print("SUP_VIV_SBR", end=": ")
 print(countSUP_VIV_SBR_AEG)
-print("ErrorsIndeterminat", end=": ")
+print("ErrorsIndeterminat i P_CORR", end=": ")
 print(countError_AEG)
 

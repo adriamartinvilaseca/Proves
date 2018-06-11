@@ -1,8 +1,6 @@
 import psycopg2
 import csv
-import copy
 import pandas as pd
-
 
 def getReferencies(cursor):
     cursor.execute("SELECT REFCAT, SECC_CENSAL, IMMB_US_PRN, IMMB_TIPUS, IMMB_TIPUS_PERCENT, UNI_PLURI_CORR, NUM_V, "
@@ -13,7 +11,6 @@ def getReferencies(cursor):
 def getRef(cursor, refcat):
     cursor.execute("SELECT * FROM referencies_alpha WHERE REFCAT = '{}';".format(refcat))
     return cursor.fetchall()
-
 
 conn_string = "host='prodtestdb.czciosgdrat6.eu-west-1.rds.amazonaws.com' dbname='dbprodtest' user='testuser' password='CICLICAc1cl1c4'"
 print("Connecting to database\n	->%s" % (conn_string))
@@ -56,8 +53,6 @@ for r in conjuntRA:
     r = list(r)
     if r[4] is not None:
         r[4] = float(r[4])
-    if r[6] is not None:
-        r[6] = int(r[6])
     if r[15] is not None:
         r[15] = float(r[15])
     if r[16] is not None:
@@ -66,8 +61,12 @@ for r in conjuntRA:
         r[17] = float(r[17])
     if r[18] is not None:
         r[18] = float(r[18])
+    if r[6] is not None and r[16] > 0:
+        r[6] = int(r[6])
+    else:
+        r[6] = 0
 
-    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[13] != "" and r[17] * 10 < r[15]:
+    if r[1] in aeg and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
         segmentacio100[r[13]][0] += 1
         segmentacio100[r[13]][1] += r[6]
         segmentacio100[r[13]][2] += r[15]
@@ -83,8 +82,8 @@ print(segmentacio100DF)
 segmentacio100DF.to_csv("Segmentacio100.csv")
 
 print("")
-print("Num immb: ", end=": ")
+print("Num immb", end=": ")
 print(immbtotal)
-print("Num hab: ", end=": ")
+print("Num hab", end=": ")
 print(vivtotal)
 

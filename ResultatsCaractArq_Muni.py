@@ -109,8 +109,6 @@ for r in conjuntRef:
                 r.append(a)
     if r[4] is not None:
         r[4] = float(r[4])
-    if r[6] is not None:
-        r[6] = int(r[6])
     if r[15] is not None:
         r[15] = float(r[15])
     if r[16] is not None:
@@ -119,22 +117,31 @@ for r in conjuntRef:
         r[17] = float(r[17])
     if r[18] is not None:
         r[18] = float(r[18])
+    if r[6] is not None and r[16] > 0:
+        r[6] = int(r[6])
+    else:
+        r[6] = 0
 
 #################################################### Immb_us_prn #######################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[17] * 10 < r[15]:
-        if r[2] == "AltresCal" or r[2] == "AltresNoCal" or r[2] == "Emmagatzematge":
+    if r[1] in aeg and r[5] != "P_CORR" and r[17] * 10 <= r[16]:
+        if r[2] == "AltresCal" or r[2] == "AltresNoCal" or r[2] == "Emmagatzematge" or r[2] == "Comu" or \
+                r[2] == "VincViv":
             resultatsMuni[r[19]]["Altres"] += r[6]
         elif r[2] != "Comu" and r[2] != "VincViv":
             resultatsMuni[r[19]][r[2]] += r[6]
         resultatsMuni[r[19]]["Total_immb_us_prn"] += r[6]
 
 #################################################### Immb_tipus_resi ###################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[17] * 10 < r[15]:
-        resultatsMuni[r[19]][r[3]] += r[6]
-        resultatsMuni[r[19]]["Total_immb_tipus_resi"] += r[6]
+    if r[1] in aeg and r[5] != "P_CORR" and r[17] * 10 <= r[16]:
+        if r[3] == "IMMB_NO_V":
+            resultatsMuni[r[19]][r[3]] += r[6]
+            resultatsMuni[r[19]]["Total_immb_tipus_resi"] += r[6]
+        elif r[16] > 0:
+            resultatsMuni[r[19]][r[3]] += r[6]
+            resultatsMuni[r[19]]["Total_immb_tipus_resi"] += r[6]
 
 #################################################### Immb_tipus_prop ###################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "" and r[17] * 10 < r[15]:
+    if r[1] in aeg and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
         if r[5] == "U" :
             resultatsMuni[r[19]]["NoDivisioHor"] += r[6]
         elif r[5] == "P":
@@ -142,12 +149,12 @@ for r in conjuntRef:
         resultatsMuni[r[19]]["Total_immb_tipus_prop"] += r[6]
 
 #################################################### Immb_num_v ########################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "" and r[17] * 10 < r[15]:
+    if r[1] in aeg and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
         resultatsMuni[r[19]][r[7]] += r[6]
         resultatsMuni[r[19]]["Total_num_v"] += r[6]
 
 #################################################### Immb_ord ##########################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "" and r[17] * 10 < r[15]:
+    if r[1] in aeg and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
         if r[8] == "IND" or r[8] == "NO_V":
             resultatsMuni[r[19]]["IND"] += r[6]
         else:
@@ -155,12 +162,12 @@ for r in conjuntRef:
         resultatsMuni[r[19]]["Total_Ord"] += r[6]
 
 #################################################### Immb_anycons ######################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "" and r[17] * 10 < r[15]:
+    if r[1] in aeg and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
         resultatsMuni[r[19]][r[10]] += r[6]
         resultatsMuni[r[19]]["Total_anycons"] += r[6]
 
 #################################################### Immb_numplantes ###################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[6] is not None and r[6] != 0 and r[12] != "" and r[17] * 10 < r[15]:
+    if r[1] in aeg and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
         resultatsMuni[r[19]][r[12]] += r[6]
         resultatsMuni[r[19]]["Total_immb_numplantes"] += r[6]
 
