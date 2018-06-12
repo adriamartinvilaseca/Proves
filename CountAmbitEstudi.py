@@ -29,6 +29,7 @@ nomsVariables = ["immb", "viv", "m2_SBR", "m2_VIV_SBR"]
 nomsVariablesPlanol = ["Immb_us_prn", "Immb_tipus_resi", "Immb_tipus_prop", "Immb_num_v", "Immb_ord",
                       "Immb_anycons", "Immb_numplantes", "Cluster"]
 aeg = []
+saed = []
 conjuntRefAEG = 0
 municipis = {}
 error1 = []
@@ -39,6 +40,12 @@ with open("SeccCensals_AEG.csv") as csvfile:
     next(ambitreader)
     for i in ambitreader:
         aeg.append(i[0])
+
+with open("SeccCensals_SAED.csv") as csvfile3:
+    ambitreader1 = csv.reader(csvfile3, delimiter=",")
+    next(ambitreader1)
+    for i in ambitreader1:
+        saed.append(i[0])
 
 with open("SeccCensals_Municipis.csv") as csvfile2:
     munireader = csv.reader(csvfile2, delimiter=";")
@@ -63,6 +70,13 @@ countSUP_TOTAL_AEG = 0
 countSUP_SBR_AEG = 0
 countSUP_VIV_SBR_AEG = 0
 countError_AEG = 0
+countImmb_SAED = 0
+countImmb_VIV_SAED = 0
+countViv_SAED = 0
+countSUP_TOTAL_SAED = 0
+countSUP_SBR_SAED = 0
+countSUP_VIV_SBR_SAED = 0
+countError_SAED = 0
 
 #################################################### Analisi variables #################################################
 for r in conjuntRef:
@@ -92,6 +106,15 @@ for r in conjuntRef:
             countImmb_VIV_AEG += 1
             countViv_AEG += r[6]
             countSUP_VIV_SBR_AEG += r[16]
+    if r[1] in saed and r[5] != "P_CORR" and r[17]*10 <= r[16] and ((r[3] != "IMMB_NO_V" and r[16] > 0) or
+                                                                   r[3] == "IMMB_NO_V"):
+        countImmb_SAED += 1
+        countSUP_TOTAL_SAED += r[19]
+        countSUP_SBR_SAED += r[15]
+        if r[16] > 0:
+            countImmb_VIV_SAED += 1
+            countViv_SAED += r[6]
+            countSUP_VIV_SBR_SAED += r[16]
     if r[5] != "P_CORR" and r[17]*10 <= r[16]and ((r[3] != "IMMB_NO_V" and r[16] > 0) or
                                                                    r[3] == "IMMB_NO_V"):
         countImmb += 1
@@ -132,4 +155,20 @@ print("SUP_VIV_SBR", end=": ")
 print(countSUP_VIV_SBR_AEG)
 print("ErrorsIndeterminat i P_CORR", end=": ")
 print(countError_AEG)
+print("")
+print("SAED:")
+print("Immb", end=": ")
+print(countImmb_SAED)
+print("Immb_VIV", end=": ")
+print(countImmb_VIV_SAED)
+print("Viv", end=": ")
+print(countViv_SAED)
+print("SUP_TOTAL", end=": ")
+print(countSUP_TOTAL_SAED)
+print("SUP_SBR", end=": ")
+print(countSUP_SBR_SAED)
+print("SUP_VIV_SBR", end=": ")
+print(countSUP_VIV_SBR_SAED)
+print("ErrorsIndeterminat i P_CORR", end=": ")
+print(countError_SAED)
 
