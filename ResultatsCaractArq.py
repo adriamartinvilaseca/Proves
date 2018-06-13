@@ -233,6 +233,7 @@ for r in conjuntRef:
         immb_numplantes[r[12]][2] += r[15]
         immb_numplantes[r[12]][3] += r[16]
         planolRef[r[0]][6] = r[12]
+        planolRef[r[0]][7] = r[14]
         immb_numplantes["Total"][0] += 1
         immb_numplantes["Total"][1] += r[6]
         immb_numplantes["Total"][2] += r[15]
