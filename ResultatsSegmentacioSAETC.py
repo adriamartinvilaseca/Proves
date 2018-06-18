@@ -26,6 +26,7 @@ conn.close()
 
 nomsVariables = ["immb", "viv", "m2_SBR", "m2_VIV_SBR"]
 saetc = []
+noSaetc = []
 ref_aeg = []
 segmentacio100 = {
     "A.1.1": [0, 0, 0, 0], "A.1.2": [0, 0, 0, 0], "A.1.3": [0, 0, 0, 0], "A.1.4": [0, 0, 0, 0], "A.1.5": [0, 0, 0, 0], "A.2.1": [0, 0, 0, 0], "A.2.2": [0, 0, 0, 0], "A.2.3": [0, 0, 0, 0], "A.2.4": [0, 0, 0, 0], "A.2.5": [0, 0, 0, 0],
@@ -45,6 +46,12 @@ with open("SeccCensals_SAETC.csv") as csvfile :
     next(ambitreader)
     for i in ambitreader:
         saetc.append(i[0])
+
+with open("Refcat_No_SAETC.csv") as csvfile :
+    ambitreader = csv.reader(csvfile, delimiter=",")
+    next(ambitreader)
+    for i in ambitreader:
+        noSaetc.append(i[0])
 
 immbtotal = 0
 vivtotal = 0
@@ -66,7 +73,7 @@ for r in conjuntRA:
     else:
         r[6] = 0
 
-    if r[1] in saetc and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
+    if r[1] in saetc and r[0] not in noSaetc and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
         segmentacio100[r[13]][0] += 1
         segmentacio100[r[13]][1] += r[6]
         segmentacio100[r[13]][2] += r[15]
