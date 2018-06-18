@@ -84,8 +84,21 @@ for m in municipis:
         "I.1.1": 0, "I.1.2": 0, "I.1.3": 0, "I.1.4": 0, "I.1.5": 0, "I.2.1": 0, "I.2.2": 0, "I.2.3": 0, "I.2.4": 0, "I.2.5": 0,
         "J.1.1": 0, "J.1.2": 0, "J.1.3": 0, "J.1.4": 0, "J.1.5": 0, "J.2.1": 0, "J.2.2": 0, "J.2.3": 0, "J.2.4": 0, "J.2.5": 0
     }
-    resultatsMuni_tots[m] = 0
+    resultatsMuni_tots[m] = {
+        "A.1.1": 0, "A.1.2": 0, "A.1.3": 0, "A.1.4": 0, "A.1.5": 0, "A.2.1": 0, "A.2.2": 0, "A.2.3": 0, "A.2.4": 0, "A.2.5": 0,
+        "B.1.1": 0, "B.1.2": 0, "B.1.3": 0, "B.1.4": 0, "B.1.5": 0, "B.2.1": 0, "B.2.2": 0, "B.2.3": 0, "B.2.4": 0, "B.2.5": 0,
+        "C.1.1": 0, "C.1.2": 0, "C.1.3": 0, "C.1.4": 0, "C.1.5": 0, "C.2.1": 0, "C.2.2": 0, "C.2.3": 0, "C.2.4": 0, "C.2.5": 0,
+        "D.1.1": 0, "D.1.2": 0, "D.1.3": 0, "D.1.4": 0, "D.1.5": 0, "D.2.1": 0, "D.2.2": 0, "D.2.3": 0, "D.2.4": 0, "D.2.5": 0,
+        "E.1.1": 0, "E.1.2": 0, "E.1.3": 0, "E.1.4": 0, "E.1.5": 0, "E.2.1": 0, "E.2.2": 0, "E.2.3": 0, "E.2.4": 0, "E.2.5": 0,
+        "F.1.1": 0, "F.1.2": 0, "F.1.3": 0, "F.1.4": 0, "F.1.5": 0, "F.2.1": 0, "F.2.2": 0, "F.2.3": 0, "F.2.4": 0, "F.2.5": 0,
+        "G.1.1": 0, "G.1.2": 0, "G.1.3": 0, "G.1.4": 0, "G.1.5": 0, "G.2.1": 0, "G.2.2": 0, "G.2.3": 0, "G.2.4": 0, "G.2.5": 0,
+        "H.1.1": 0, "H.1.2": 0, "H.1.3": 0, "H.1.4": 0, "H.1.5": 0, "H.2.1": 0, "H.2.2": 0, "H.2.3": 0, "H.2.4": 0, "H.2.5": 0,
+        "I.1.1": 0, "I.1.2": 0, "I.1.3": 0, "I.1.4": 0, "I.1.5": 0, "I.2.1": 0, "I.2.2": 0, "I.2.3": 0, "I.2.4": 0, "I.2.5": 0,
+        "J.1.1": 0, "J.1.2": 0, "J.1.3": 0, "J.1.4": 0, "J.1.5": 0, "J.2.1": 0, "J.2.2": 0, "J.2.3": 0, "J.2.4": 0, "J.2.5": 0
+    }
 
+immbtotal_tots = 0
+vivtotal_tots = 0
 immbtotal_AEG = 0
 vivtotal_AEG = 0
 immbtotal_SAED = 0
@@ -114,8 +127,10 @@ for r in conjuntRA:
         r[6] = 0
     if r[1] != "":
         count += 1
-    # if r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
-    #     resultatsMuni_tots[r[19]] += r[6]
+    if r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
+        resultatsMuni_tots[r[19]][r[13]] += r[6]
+        immbtotal_tots += 1
+        vivtotal_tots += r[6]
     if r[1] in aeg and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
         resultatsMuni_AEG[r[19]][r[13]] += r[6]
         immbtotal_AEG += 1
@@ -124,6 +139,11 @@ for r in conjuntRA:
         resultatsMuni_SAED[r[19]][r[13]] += r[6]
         immbtotal_SAED += 1
         vivtotal_SAED += r[6]
+
+resultatsMuniDF_tots = pd.DataFrame(resultatsMuni_tots)
+resultatsMuniDF_tots = resultatsMuniDF_tots.T
+print(resultatsMuniDF_tots)
+resultatsMuniDF_tots.to_csv("ResultatsSegMuni_tots.csv")
 
 resultatsMuniDF_AEG = pd.DataFrame(resultatsMuni_AEG)
 resultatsMuniDF_AEG = resultatsMuniDF_AEG.T
@@ -135,10 +155,11 @@ resultatsMuniDF_SAED = resultatsMuniDF_SAED.T
 print(resultatsMuniDF_SAED)
 resultatsMuniDF_SAED.to_csv("ResultatsSegMuni_SAED.csv")
 
-# resultatsMuniDF_tots = pd.DataFrame(resultatsMuni_tots)
-# resultatsMuniDF_tots = resultatsMuniDF_tots.T
-# print(resultatsMuni_tots)
-
+print("")
+print("Num immb tots", end=": ")
+print(immbtotal_tots)
+print("Num hab tots", end=": ")
+print(vivtotal_tots)
 print("")
 print("Num immb AEG", end=": ")
 print(immbtotal_AEG)
