@@ -49,13 +49,13 @@ with open("SeccCensals_SAED.csv") as csvfile:
 
 with open("SeccCensals_Municipis_totes.csv") as csvfile2:
     munireader = csv.reader(csvfile2, delimiter=";")
+    next(munireader)
     for r in munireader:
-        seccCensalsMuni = []
-        for a in r[1:]:
-            if a != "":
-                seccCensalsMuni.append(a)
-        municipisSC[r[0]] = seccCensalsMuni
-        municipis.append(r[0])
+        if r[1] not in municipisSC:
+            municipisSC[r[1]] = []
+        else:
+            municipisSC[r[1]].append(r[0])
+        municipis.append(r[1])
 
 nomsVariables = ["immb", "viv", "m2_SBR", "m2_VIV_SBR"]
 ref_aeg = []
@@ -111,6 +111,9 @@ for r in conjuntRA:
         for b in municipisSC[a]:
             if r[1] == b:
                 r.append(a)
+    if len(r) != 20:
+        count += 1
+        r.append("")
     if r[4] is not None:
         r[4] = float(r[4])
     if r[15] is not None:
@@ -125,17 +128,15 @@ for r in conjuntRA:
         r[6] = int(r[6])
     else:
         r[6] = 0
-    if r[1] != "":
-        count += 1
-    if r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
+    if r[19] != "" and len(r[13]) == 5 and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
         resultatsMuni_tots[r[19]][r[13]] += r[6]
         immbtotal_tots += 1
         vivtotal_tots += r[6]
-    if r[1] in aeg and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
+    if r[19] != "" and r[1] in aeg and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
         resultatsMuni_AEG[r[19]][r[13]] += r[6]
         immbtotal_AEG += 1
         vivtotal_AEG += r[6]
-    if r[1] in saed and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
+    if r[19] != "" and r[1] in saed and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
         resultatsMuni_SAED[r[19]][r[13]] += r[6]
         immbtotal_SAED += 1
         vivtotal_SAED += r[6]
