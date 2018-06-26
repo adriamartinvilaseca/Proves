@@ -238,6 +238,7 @@ variables = ["Residencial", "Comercial", "Oficines", "HotelerRestauracio", "Publ
              "P_40mes", "Total_num_v", "EAI", "EAV", "EVE", "EFI", "IND", "Total_Ord", "FS35", "3660", "6180", "8107", 
              "08EN", "Total_anycons", "De P-1 en avall", "De PB a PB+2", "De PB+3 o mes", "Total_immb_numplantes"]
 
+################################################ Creació DataFrames ####################################################
 resultatsMuni_immbDF = pd.DataFrame(resultatsMuni_immb)
 resultatsMuni_immbDF = resultatsMuni_immbDF.reindex(variables)
 resultatsMuni_vivDF = pd.DataFrame(resultatsMuni_viv)
@@ -247,6 +248,7 @@ resultatsMuni_SupSBRDF = resultatsMuni_SupSBRDF.reindex(variables)
 resultatsMuni_SupVivSBRDF = pd.DataFrame(resultatsMuni_SupVivSBR)
 resultatsMuni_SupVivSBRDF = resultatsMuni_SupVivSBRDF.reindex(variables)
 
+################################################ Guardar a excel #######################################################
 writer = ExcelWriter("ResultatsArqMuni.xlsx", engine="xlsxwriter")
 resultatsMuni_immbDF.to_excel(writer, sheet_name="Immb")
 resultatsMuni_vivDF.to_excel(writer, sheet_name="Viv")
