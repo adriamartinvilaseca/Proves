@@ -1,6 +1,5 @@
 import psycopg2
 import csv
-import pandas as pd
 
 def getReferencies(cursor):
     cursor.execute("SELECT REFCAT, SECC_CENSAL, IMMB_US_PRN, IMMB_TIPUS, IMMB_TIPUS_PERCENT, UNI_PLURI_CORR, NUM_V, "
@@ -25,9 +24,6 @@ cursor.close()
 conn.close()
 
 
-nomsVariables = ["immb", "viv", "m2_SBR", "m2_VIV_SBR"]
-nomsVariablesPlanol = ["Immb_us_prn", "Immb_tipus_resi", "Immb_tipus_prop", "Immb_num_v", "Immb_ord",
-                      "Immb_anycons", "Immb_numplantes", "Cluster"]
 aeg = []
 saed = []
 saetc = []
@@ -54,14 +50,16 @@ with open("SeccCensals_SAETC.csv") as csvfile4:
     for i in ambitreader2:
         saetc.append(i[0])
 
-with open("SeccCensals_Municipis.csv") as csvfile2:
+with open("SeccCensals_Municipis_totes.csv") as csvfile2:
     munireader = csv.reader(csvfile2, delimiter=";")
+    next(munireader)
     for r in munireader:
         seccCensalsMuni = []
-        for a in r[1:]:
-            if a != "":
-                seccCensalsMuni.append(a)
-        municipis[r[0]] = seccCensalsMuni
+        for r in munireader:
+            if r[1] not in municipis:
+                municipis[r[1]] = [r[0]]
+            else:
+                municipis[r[1]].append(r[0])
 
 countImmb = 0
 countImmb_VIV = 0
@@ -138,8 +136,8 @@ for r in conjuntRef:
             countImmb_VIV_SAETC += 1
             countViv_SAETC += r[6]
             countSUP_VIV_SBR_SAETC += r[16]
-    if r[5] != "P_CORR" and r[17]*10 <= r[16]and ((r[3] != "IMMB_NO_V" and r[16] > 0) or
-                                                                   r[3] == "IMMB_NO_V"):
+    if r[1] != "" and r[5] != "P_CORR" and r[17]*10 <= r[16] and ((r[3] != "IMMB_NO_V" and r[16] > 0) or
+                                                                  (r[3] == "IMMB_NO_V" and r[16] == 0)):
         countImmb += 1
         if r[16] > 0:
             countImmb_VIV += 1
@@ -147,6 +145,8 @@ for r in conjuntRef:
             countSUP_VIV_SBR += r[16]
         countSUP_TOTAL += r[19]
         countSUP_SBR += r[15]
+
+#################################################### Print #############################################################
 print("TOTAL:")
 print("Immb", end=": ")
 print(countImmb)
