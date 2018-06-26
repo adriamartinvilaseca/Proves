@@ -1,6 +1,7 @@
 import psycopg2
 import csv
 import pandas as pd
+from pandas import ExcelWriter
 
 
 def getReferencies(cursor):
@@ -25,12 +26,14 @@ conn.commit()
 cursor.close()
 conn.close()
 
-nomsVariables = ["viv"]
 aeg = []
 conjuntRefAEG = 0
 municipisSC = {}
 municipis = []
-resultatsMuni = {}
+resultatsMuni_immb = {}
+resultatsMuni_viv = {}
+resultatsMuni_SupVivSBR = {}
+resultatsMuni_SupSBR = {}
 
 with open("SeccCensals_AEG.csv") as csvfile:
     ambitreader = csv.reader(csvfile, delimiter=",")
@@ -38,65 +41,54 @@ with open("SeccCensals_AEG.csv") as csvfile:
     for i in ambitreader:
         aeg.append(i[0])
 
-with open("SeccCensals_Municipis.csv") as csvfile2:
+with open("SeccCensals_Municipis_totes.csv") as csvfile2:
     munireader = csv.reader(csvfile2, delimiter=";")
+    next(munireader)
     for r in munireader:
-        seccCensalsMuni = []
-        for a in r[1:]:
-            if a != "":
-                seccCensalsMuni.append(a)
-        municipisSC[r[0]] = seccCensalsMuni
-        municipis.append(r[0])
+        if r[1] not in municipisSC:
+            municipisSC[r[1]] = [r[0]]
+        else:
+            municipisSC[r[1]].append(r[0])
+        municipis.append(r[1])
 
 #################################################### Definicio diccionaris #############################################
 for m in municipis:
-    resultatsMuni[m] = {
-        "Residencial": 0,
-        "Comercial": 0,
-        "Oficines": 0,
-        "HotelerRestauracio": 0,
-        "Public": 0,
-        "EnsenyamentCultural": 0,
-        "Esportiu": 0,
-        "Piscines": 0,
-        "Industrial": 0,
-        "IndustrialResta": 0,
-        "Aparcament": 0,
-        "Altres": 0,
-        "Total_immb_us_prn": 0,
-        "IMMB_EXC_V": 0,
-        "IMMB_PRN_75_V": 0,
-        "IMMB_PRN_50_V": 0,
-        "IMMB_AMB_V": 0,
-        "IMMB_NO_V": 0,
-        "Total_immb_tipus_resi": 0,
-        "DivisioHor": 0,
-        "NoDivisioHor": 0,
-        "Total_immb_tipus_prop": 0,
-        "U": 0,
-        "P_2a4": 0,
-        "P_5a9": 0,
-        "P_10a19": 0,
-        "P_20a39": 0,
-        "P_40mes": 0,
-        "Total_num_v": 0,
-        "EAI": 0,
-        "EAV": 0,
-        "EVE": 0,
-        "EFI": 0,
-        "IND": 0,
-        "Total_Ord": 0,
-        "FS35": 0,
-        "3660": 0,
-        "6180": 0,
-        "8107": 0,
-        "08EN": 0,
-        "Total_anycons": 0,
-        "De P-1 en avall": 0,
-        "De PB a PB+2": 0,
-        "De PB+3 o mes": 0,
-        "Total_immb_numplantes": 0
-    }
+    resultatsMuni_immb[m] = {"Residencial": 0, "Comercial": 0, "Oficines": 0, "HotelerRestauracio": 0, "Public": 0,
+                            "EnsenyamentCultural": 0, "Esportiu": 0, "Piscines": 0, "Industrial": 0,
+                            "IndustrialResta": 0, "Aparcament": 0, "Altres": 0, "Total_immb_us_prn": 0, "IMMB_EXC_V": 0,
+                            "IMMB_PRN_75_V": 0, "IMMB_PRN_50_V": 0, "IMMB_AMB_V": 0, "IMMB_NO_V": 0,
+                            "Total_immb_tipus_resi": 0, "DivisioHor": 0, "NoDivisioHor": 0, "Total_immb_tipus_prop": 0,
+                            "U": 0, "P_2a4": 0, "P_5a9": 0, "P_10a19": 0, "P_20a39": 0, "P_40mes": 0, "Total_num_v": 0,
+                            "EAI": 0, "EAV": 0, "EVE": 0, "EFI": 0, "IND": 0, "Total_Ord": 0, "FS35": 0, "3660": 0,
+                            "6180": 0, "8107": 0, "08EN": 0, "Total_anycons": 0, "De P-1 en avall": 0,
+                            "De PB a PB+2": 0, "De PB+3 o mes": 0, "Total_immb_numplantes": 0}
+    resultatsMuni_viv[m] = {"Residencial": 0, "Comercial": 0, "Oficines": 0, "HotelerRestauracio": 0, "Public": 0,
+                            "EnsenyamentCultural": 0, "Esportiu": 0, "Piscines": 0, "Industrial": 0,
+                            "IndustrialResta": 0, "Aparcament": 0, "Altres": 0, "Total_immb_us_prn": 0, "IMMB_EXC_V": 0,
+                            "IMMB_PRN_75_V": 0, "IMMB_PRN_50_V": 0, "IMMB_AMB_V": 0, "IMMB_NO_V": 0,
+                            "Total_immb_tipus_resi": 0, "DivisioHor": 0, "NoDivisioHor": 0, "Total_immb_tipus_prop": 0,
+                            "U": 0, "P_2a4": 0, "P_5a9": 0, "P_10a19": 0, "P_20a39": 0, "P_40mes": 0, "Total_num_v": 0,
+                            "EAI": 0, "EAV": 0, "EVE": 0, "EFI": 0, "IND": 0, "Total_Ord": 0, "FS35": 0, "3660": 0,
+                            "6180": 0, "8107": 0, "08EN": 0, "Total_anycons": 0, "De P-1 en avall": 0,
+                            "De PB a PB+2": 0, "De PB+3 o mes": 0, "Total_immb_numplantes": 0}
+    resultatsMuni_SupSBR[m] = {"Residencial": 0, "Comercial": 0, "Oficines": 0, "HotelerRestauracio": 0, "Public": 0,
+                            "EnsenyamentCultural": 0, "Esportiu": 0, "Piscines": 0, "Industrial": 0,
+                            "IndustrialResta": 0, "Aparcament": 0, "Altres": 0, "Total_immb_us_prn": 0, "IMMB_EXC_V": 0,
+                            "IMMB_PRN_75_V": 0, "IMMB_PRN_50_V": 0, "IMMB_AMB_V": 0, "IMMB_NO_V": 0,
+                            "Total_immb_tipus_resi": 0, "DivisioHor": 0, "NoDivisioHor": 0, "Total_immb_tipus_prop": 0,
+                            "U": 0, "P_2a4": 0, "P_5a9": 0, "P_10a19": 0, "P_20a39": 0, "P_40mes": 0, "Total_num_v": 0,
+                            "EAI": 0, "EAV": 0, "EVE": 0, "EFI": 0, "IND": 0, "Total_Ord": 0, "FS35": 0, "3660": 0,
+                            "6180": 0, "8107": 0, "08EN": 0, "Total_anycons": 0, "De P-1 en avall": 0,
+                            "De PB a PB+2": 0, "De PB+3 o mes": 0, "Total_immb_numplantes": 0}
+    resultatsMuni_SupVivSBR[m] = {"Residencial": 0, "Comercial": 0, "Oficines": 0, "HotelerRestauracio": 0, "Public": 0,
+                            "EnsenyamentCultural": 0, "Esportiu": 0, "Piscines": 0, "Industrial": 0,
+                            "IndustrialResta": 0, "Aparcament": 0, "Altres": 0, "Total_immb_us_prn": 0, "IMMB_EXC_V": 0,
+                            "IMMB_PRN_75_V": 0, "IMMB_PRN_50_V": 0, "IMMB_AMB_V": 0, "IMMB_NO_V": 0,
+                            "Total_immb_tipus_resi": 0, "DivisioHor": 0, "NoDivisioHor": 0, "Total_immb_tipus_prop": 0,
+                            "U": 0, "P_2a4": 0, "P_5a9": 0, "P_10a19": 0, "P_20a39": 0, "P_40mes": 0, "Total_num_v": 0,
+                            "EAI": 0, "EAV": 0, "EVE": 0, "EFI": 0, "IND": 0, "Total_Ord": 0, "FS35": 0, "3660": 0,
+                            "6180": 0, "8107": 0, "08EN": 0, "Total_anycons": 0, "De P-1 en avall": 0,
+                            "De PB a PB+2": 0, "De PB+3 o mes": 0, "Total_immb_numplantes": 0}
 
 #################################################### Analisi variables #################################################
 for r in conjuntRef:
@@ -121,55 +113,115 @@ for r in conjuntRef:
         r[6] = int(r[6])
     else:
         r[6] = 0
+    if len(r) != 20:
+        r.append("")
 
 #################################################### Immb_us_prn #######################################################
-    if r[1] in aeg and r[5] != "P_CORR" and r[17] * 10 <= r[16]:
+    if r[1] in aeg and r[5] != "P_CORR" and r[17] * 10 <= r[16] and ((r[3] != "IMMB_NO_V" and r[16] > 0) or
+                                                                     r[3] == "IMMB_NO_V"):
         if r[2] == "AltresCal" or r[2] == "AltresNoCal" or r[2] == "Emmagatzematge" or r[2] == "Comu" or \
                 r[2] == "VincViv":
-            resultatsMuni[r[19]]["Altres"] += r[6]
+            resultatsMuni_immb[r[19]]["Altres"] += 1
+            resultatsMuni_viv[r[19]]["Altres"] += r[6]
+            resultatsMuni_SupSBR[r[19]]["Altres"] += r[15]
+            resultatsMuni_SupVivSBR[r[19]]["Altres"] += r[16]
         elif r[2] != "Comu" and r[2] != "VincViv":
-            resultatsMuni[r[19]][r[2]] += r[6]
-        resultatsMuni[r[19]]["Total_immb_us_prn"] += r[6]
+            resultatsMuni_immb[r[19]][r[2]] += 1
+            resultatsMuni_viv[r[19]][r[2]] += r[6]
+            resultatsMuni_SupSBR[r[19]][r[2]] += r[15]
+            resultatsMuni_SupVivSBR[r[19]][r[2]] += r[16]
+        resultatsMuni_immb[r[19]]["Total_immb_us_prn"] += 1
+        resultatsMuni_viv[r[19]]["Total_immb_us_prn"] += r[6]
+        resultatsMuni_SupSBR[r[19]]["Total_immb_us_prn"] += r[15]
+        resultatsMuni_SupVivSBR[r[19]]["Total_immb_us_prn"] += r[16]
 
 #################################################### Immb_tipus_resi ###################################################
     if r[1] in aeg and r[5] != "P_CORR" and r[17] * 10 <= r[16]:
         if r[3] == "IMMB_NO_V":
-            resultatsMuni[r[19]][r[3]] += r[6]
-            resultatsMuni[r[19]]["Total_immb_tipus_resi"] += r[6]
+            resultatsMuni_immb[r[19]][r[3]] += 1
+            resultatsMuni_viv[r[19]][r[3]] += r[6]
+            resultatsMuni_SupSBR[r[19]][r[3]] += r[15]
+            resultatsMuni_SupVivSBR[r[19]][r[3]] += r[16]
+            resultatsMuni_immb[r[19]]["Total_immb_tipus_resi"] += 1
+            resultatsMuni_viv[r[19]]["Total_immb_tipus_resi"] += r[6]
+            resultatsMuni_SupSBR[r[19]]["Total_immb_tipus_resi"] += r[15]
+            resultatsMuni_SupVivSBR[r[19]]["Total_immb_tipus_resi"] += r[16]
         elif r[16] > 0:
-            resultatsMuni[r[19]][r[3]] += r[6]
-            resultatsMuni[r[19]]["Total_immb_tipus_resi"] += r[6]
+            resultatsMuni_immb[r[19]][r[3]] += 1
+            resultatsMuni_viv[r[19]][r[3]] += r[6]
+            resultatsMuni_SupSBR[r[19]][r[3]] += r[15]
+            resultatsMuni_SupVivSBR[r[19]][r[3]] += r[16]
+            resultatsMuni_immb[r[19]]["Total_immb_tipus_resi"] += 1
+            resultatsMuni_viv[r[19]]["Total_immb_tipus_resi"] += r[6]
+            resultatsMuni_SupSBR[r[19]]["Total_immb_tipus_resi"] += r[15]
+            resultatsMuni_SupVivSBR[r[19]]["Total_immb_tipus_resi"] += r[16]
 
 #################################################### Immb_tipus_prop ###################################################
     if r[1] in aeg and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
-        if r[5] == "U" :
-            resultatsMuni[r[19]]["NoDivisioHor"] += r[6]
+        if r[5] == "U":
+            resultatsMuni_immb[r[19]]["NoDivisioHor"] += 1
+            resultatsMuni_viv[r[19]]["NoDivisioHor"] += r[6]
+            resultatsMuni_SupSBR[r[19]]["NoDivisioHor"] += r[15]
+            resultatsMuni_SupVivSBR[r[19]]["NoDivisioHor"] += r[16]
         elif r[5] == "P":
-            resultatsMuni[r[19]]["DivisioHor"] += r[6]
-        resultatsMuni[r[19]]["Total_immb_tipus_prop"] += r[6]
+            resultatsMuni_immb[r[19]]["DivisioHor"] += 1
+            resultatsMuni_viv[r[19]]["DivisioHor"] += r[6]
+            resultatsMuni_SupSBR[r[19]]["DivisioHor"] += r[15]
+            resultatsMuni_SupVivSBR[r[19]]["DivisioHor"] += r[16]
+        resultatsMuni_immb[r[19]]["Total_immb_tipus_prop"] += 1
+        resultatsMuni_viv[r[19]]["Total_immb_tipus_prop"] += r[6]
+        resultatsMuni_SupSBR[r[19]]["Total_immb_tipus_prop"] += r[15]
+        resultatsMuni_SupVivSBR[r[19]]["Total_immb_tipus_prop"] += r[16]
 
 #################################################### Immb_num_v ########################################################
     if r[1] in aeg and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
-        resultatsMuni[r[19]][r[7]] += r[6]
-        resultatsMuni[r[19]]["Total_num_v"] += r[6]
+        resultatsMuni_immb[r[19]][r[7]] += 1
+        resultatsMuni_viv[r[19]][r[7]] += r[6]
+        resultatsMuni_SupSBR[r[19]][r[7]] += r[15]
+        resultatsMuni_SupVivSBR[r[19]][r[7]] += r[16]
+        resultatsMuni_immb[r[19]]["Total_num_v"] += 1
+        resultatsMuni_viv[r[19]]["Total_num_v"] += r[6]
+        resultatsMuni_SupSBR[r[19]]["Total_num_v"] += r[15]
+        resultatsMuni_SupVivSBR[r[19]]["Total_num_v"] += r[16]
 
 #################################################### Immb_ord ##########################################################
     if r[1] in aeg and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
         if r[8] == "IND" or r[8] == "NO_V":
-            resultatsMuni[r[19]]["IND"] += r[6]
+            resultatsMuni_immb[r[19]]["IND"] += 1
+            resultatsMuni_viv[r[19]]["IND"] += r[6]
+            resultatsMuni_SupSBR[r[19]]["IND"] += r[15]
+            resultatsMuni_SupVivSBR[r[19]]["IND"] += r[16]
         else:
-            resultatsMuni[r[19]][r[8]] += r[6]
-        resultatsMuni[r[19]]["Total_Ord"] += r[6]
+            resultatsMuni_immb[r[19]][r[8]] += 1
+            resultatsMuni_viv[r[19]][r[8]] += r[6]
+            resultatsMuni_SupSBR[r[19]][r[8]] += r[15]
+            resultatsMuni_SupVivSBR[r[19]][r[8]] += r[16]
+        resultatsMuni_immb[r[19]]["Total_Ord"] += 1
+        resultatsMuni_viv[r[19]]["Total_Ord"] += r[6]
+        resultatsMuni_SupSBR[r[19]]["Total_Ord"] += r[15]
+        resultatsMuni_SupVivSBR[r[19]]["Total_Ord"] += r[16]
 
 #################################################### Immb_anycons ######################################################
     if r[1] in aeg and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
-        resultatsMuni[r[19]][r[10]] += r[6]
-        resultatsMuni[r[19]]["Total_anycons"] += r[6]
+        resultatsMuni_immb[r[19]][r[10]] += 1
+        resultatsMuni_viv[r[19]][r[10]] += r[6]
+        resultatsMuni_SupSBR[r[19]][r[10]] += r[15]
+        resultatsMuni_SupVivSBR[r[19]][r[10]] += r[16]
+        resultatsMuni_immb[r[19]]["Total_anycons"] += 1
+        resultatsMuni_viv[r[19]]["Total_anycons"] += r[6]
+        resultatsMuni_SupSBR[r[19]]["Total_anycons"] += r[15]
+        resultatsMuni_SupVivSBR[r[19]]["Total_anycons"] += r[16]
 
 #################################################### Immb_numplantes ###################################################
     if r[1] in aeg and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
-        resultatsMuni[r[19]][r[12]] += r[6]
-        resultatsMuni[r[19]]["Total_immb_numplantes"] += r[6]
+        resultatsMuni_immb[r[19]][r[12]] += 1
+        resultatsMuni_viv[r[19]][r[12]] += r[6]
+        resultatsMuni_SupSBR[r[19]][r[12]] += r[15]
+        resultatsMuni_SupVivSBR[r[19]][r[12]] += r[16]
+        resultatsMuni_immb[r[19]]["Total_immb_numplantes"] += 1
+        resultatsMuni_viv[r[19]]["Total_immb_numplantes"] += r[6]
+        resultatsMuni_SupSBR[r[19]]["Total_immb_numplantes"] += r[15]
+        resultatsMuni_SupVivSBR[r[19]]["Total_immb_numplantes"] += r[16]
 
 ################################################ PRINT #################################################################
 print("")
@@ -179,26 +231,27 @@ print("Total referències àmbit", end=": ")
 print(conjuntRefAEG)
 print("")
 
-custom_dict = {"Residencial": 0, "Comercial": 1, "Oficines": 2, "HotelerRestauracio": 3, "Public": 4,
-               "EnsenyamentCultural": 5, "Esportiu": 6, "Piscines": 7, "Industrial": 8, "IndustrialResta": 9,
-               "Aparcament": 10, "Altres": 11, "Total_immb_us_prn": 12, "IMMB_EXC_V": 13, "IMMB_PRN_75_V": 14,
-               "IMMB_PRN_50_V": 15, "IMMB_AMB_V": 16, "IMMB_NO_V": 17, "Total_immb_tipus_resi": 18, "DivisioHor": 19,
-               "NoDivisioHor": 20, "Total_immb_tipus_prop": 21, "U": 22, "P_2a4": 23, "P_5a9": 24, "P_10a19": 25,
-               "P_20a39": 26, "P_40mes": 27, "Total_num_v": 28, "EAI": 29, "EAV": 30, "EVE": 31, "EFI": 32, "IND": 33,
-               "Total_Ord": 34, "FS35": 35, "3660": 36, "6180": 37, "8107": 38, "08EN": 39, "Total_anycons": 40,
-               "De P-1 en avall": 41, "De PB a PB+2": 42, "De PB+3 o mes": 43, "Total_immb_numplantes": 44}
+variables = ["Residencial", "Comercial", "Oficines", "HotelerRestauracio", "Public", "EnsenyamentCultural",
+             "Esportiu", "Piscines", "Industrial", "IndustrialResta", "Aparcament", "Altres", "Total_immb_us_prn", 
+             "IMMB_EXC_V", "IMMB_PRN_75_V", "IMMB_PRN_50_V", "IMMB_AMB_V", "IMMB_NO_V", "Total_immb_tipus_resi", 
+             "NoDivisioHor", "DivisioHor", "Total_immb_tipus_prop", "U", "P_2a4", "P_5a9", "P_10a19", "P_20a39",
+             "P_40mes", "Total_num_v", "EAI", "EAV", "EVE", "EFI", "IND", "Total_Ord", "FS35", "3660", "6180", "8107", 
+             "08EN", "Total_anycons", "De P-1 en avall", "De PB a PB+2", "De PB+3 o mes", "Total_immb_numplantes"]
 
-resultatsMuniDF = pd.DataFrame(resultatsMuni)
-# resultatsMuniDF.index = municipis
-# resultatsMuniDF = resultatsMuniDF.T
-print(resultatsMuniDF)
-resultatsMuniDF.to_csv("ResultatsArqMuni.csv")
+resultatsMuni_immbDF = pd.DataFrame(resultatsMuni_immb)
+resultatsMuni_immbDF = resultatsMuni_immbDF.reindex(variables)
+resultatsMuni_vivDF = pd.DataFrame(resultatsMuni_viv)
+resultatsMuni_vivDF = resultatsMuni_vivDF.reindex(variables)
+resultatsMuni_SupSBRDF = pd.DataFrame(resultatsMuni_SupSBR)
+resultatsMuni_SupSBRDF = resultatsMuni_SupSBRDF.reindex(variables)
+resultatsMuni_SupVivSBRDF = pd.DataFrame(resultatsMuni_SupVivSBR)
+resultatsMuni_SupVivSBRDF = resultatsMuni_SupVivSBRDF.reindex(variables)
 
-# for a in resultatsMuni:
-#     keys = list(resultatsMuni[a].keys())
-#     resultats = list(resultatsMuni[a].values())
-#     resultats.insert(0, a)
-#     print(resultats)
-# print(keys)
-# provaDF = immb_us_prnDF + immb_tipus_resiDF + immb_tipus_propDF
-# resultatsMuniDF.to_csv("ResultatsArqMuni.csv")
+writer = ExcelWriter("ResultatsArqMuni.xlsx", engine="xlsxwriter")
+resultatsMuni_immbDF.to_excel(writer, sheet_name="Immb")
+resultatsMuni_vivDF.to_excel(writer, sheet_name="Viv")
+resultatsMuni_SupSBRDF.to_excel(writer, sheet_name="SupSBR")
+resultatsMuni_SupVivSBRDF.to_excel(writer, sheet_name="SupVivSBR")
+writer.save()
+
+
