@@ -1,7 +1,7 @@
 import psycopg2
 import csv
-import copy
 import pandas as pd
+from pandas import ExcelWriter
 
 
 def getReferencies(cursor):
@@ -52,7 +52,7 @@ with open("SeccCensals_Municipis_totes.csv") as csvfile2:
     next(munireader)
     for r in munireader:
         if r[1] not in municipisSC:
-            municipisSC[r[1]] = []
+            municipisSC[r[1]] = [r[0]]
         else:
             municipisSC[r[1]].append(r[0])
         municipis.append(r[1])
@@ -104,6 +104,8 @@ vivtotal_AEG = 0
 immbtotal_SAED = 0
 vivtotal_SAED = 0
 count = 0
+count2 = []
+seccNoRepresent = []
 
 for r in conjuntRA:
     r = list(r)
@@ -111,9 +113,6 @@ for r in conjuntRA:
         for b in municipisSC[a]:
             if r[1] == b:
                 r.append(a)
-    if len(r) != 20:
-        count += 1
-        r.append("")
     if r[4] is not None:
         r[4] = float(r[4])
     if r[15] is not None:
@@ -128,33 +127,32 @@ for r in conjuntRA:
         r[6] = int(r[6])
     else:
         r[6] = 0
-    if r[19] != "" and len(r[13]) == 5 and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
+    if len(r) != 20:
+        r.append("")
+    if r[5] != "P_CORR" and r[17] * 10 <= r[16] and r[3] != "IMMB_NO_V" and r[16] > 0 and r[19] != "":
         resultatsMuni_tots[r[19]][r[13]] += r[6]
         immbtotal_tots += 1
         vivtotal_tots += r[6]
-    if r[19] != "" and r[1] in aeg and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
+    if r[1] in aeg and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
         resultatsMuni_AEG[r[19]][r[13]] += r[6]
         immbtotal_AEG += 1
         vivtotal_AEG += r[6]
-    if r[19] != "" and r[1] in saed and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
+    if r[1] in saed and r[5] != "P_CORR" and r[16] > 0 and r[17] * 10 <= r[16]:
         resultatsMuni_SAED[r[19]][r[13]] += r[6]
         immbtotal_SAED += 1
         vivtotal_SAED += r[6]
 
 resultatsMuniDF_tots = pd.DataFrame(resultatsMuni_tots)
 resultatsMuniDF_tots = resultatsMuniDF_tots.T
-print(resultatsMuniDF_tots)
-resultatsMuniDF_tots.to_csv("ResultatsSegMuni_tots.csv")
+resultatsMuniDF_tots = resultatsMuniDF_tots.sort_index()
 
 resultatsMuniDF_AEG = pd.DataFrame(resultatsMuni_AEG)
 resultatsMuniDF_AEG = resultatsMuniDF_AEG.T
-print(resultatsMuniDF_AEG)
-resultatsMuniDF_AEG.to_csv("ResultatsSegMuni_AEG.csv")
+resultatsMuniDF_AEG = resultatsMuniDF_AEG.sort_index()
 
 resultatsMuniDF_SAED = pd.DataFrame(resultatsMuni_SAED)
 resultatsMuniDF_SAED = resultatsMuniDF_SAED.T
-print(resultatsMuniDF_SAED)
-resultatsMuniDF_SAED.to_csv("ResultatsSegMuni_SAED.csv")
+resultatsMuniDF_SAED = resultatsMuniDF_SAED.sort_index()
 
 print("")
 print("Num immb tots", end=": ")
@@ -171,5 +169,9 @@ print("Num immb SAED", end=": ")
 print(immbtotal_SAED)
 print("Num hab SAED", end=": ")
 print(vivtotal_SAED)
-print("")
-print(count)
+
+writer = ExcelWriter("ResultatsSegMuni.xlsx", engine="xlsxwriter")
+resultatsMuniDF_tots.to_excel(writer, sheet_name="Tots")
+resultatsMuniDF_AEG.to_excel(writer, sheet_name="AEG")
+resultatsMuniDF_SAED.to_excel(writer, sheet_name="SAED")
+writer.save()
