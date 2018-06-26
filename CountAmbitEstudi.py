@@ -23,7 +23,6 @@ conn.commit()
 cursor.close()
 conn.close()
 
-
 aeg = []
 saed = []
 saetc = []
